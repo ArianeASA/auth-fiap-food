@@ -1,0 +1,125 @@
+package main
+
+import (
+	"auth-fiap-food/adapters"
+	"encoding/json"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"strings"
+
+	"log"
+	"net/http"
+)
+
+func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+	credential := &adapters.Credentials{}
+	err := json.Unmarshal([]byte(req.Body), &credential)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+	token, err := GetToken(credential)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	obj, err := json.Marshal(token)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{}, err
+	}
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusCreated,
+		Body:       string(obj),
+	}, nil
+
+}
+
+func GetToken(cred *adapters.Credentials) (adapters.AuthResult, error) {
+	authClient, err := adapters.NewAuthExternalClient()
+	if err != nil {
+		return adapters.AuthResult{}, nil
+	}
+
+	token, err := authClient.NewToken(cred)
+	if err != nil {
+		return adapters.AuthResult{}, err
+	}
+
+	return token, nil
+}
+
+func CreateUser(user adapters.User) error {
+	authClient, err := adapters.NewAuthExternalClient()
+	if err != nil {
+		return nil
+	}
+
+	err = authClient.NewUser(user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+
+	var user adapters.User
+	err := json.Unmarshal([]byte(req.Body), &user)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	err = CreateUser(user)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       err.Error(),
+		}, nil
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusCreated,
+		Body:       "Created",
+	}, nil
+}
+
+func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+	log.Printf("EVENT : %v", req)
+	httpRequest := req.RequestContext.HTTP
+
+	if strings.HasSuffix(httpRequest.Path, "/users") {
+		if httpRequest.Method == "POST" {
+			return handleCreateUser(req)
+		}
+	}
+
+	if strings.HasSuffix(httpRequest.Path, "/users/token") {
+		if httpRequest.Method == "POST" {
+			return handleGetToken(req)
+		}
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusMethodNotAllowed,
+		Body:       http.StatusText(http.StatusMethodNotAllowed),
+	}, nil
+	//js, _ := json.Marshal(req)
+	//return events.APIGatewayProxyResponse{
+	//	StatusCode: http.StatusMethodNotAllowed,
+	//	Body:       string(js),
+	//}, nil
+}
+
+func main() {
+	lambda.Start(router)
+}
