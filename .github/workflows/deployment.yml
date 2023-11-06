@@ -31,7 +31,6 @@ jobs:
       run: zip main.zip main
 
     - name: AWS Lambda Deploy
-      if: github.ref == 'refs/heads/master'
       uses: appleboy/lambda-action@v0.1.9
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
