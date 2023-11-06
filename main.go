@@ -113,11 +113,6 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
 	}, nil
-	//js, _ := json.Marshal(req)
-	//return events.APIGatewayProxyResponse{
-	//	StatusCode: http.StatusMethodNotAllowed,
-	//	Body:       string(js),
-	//}, nil
 }
 
 func main() {
