@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  deploy-lambda:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
