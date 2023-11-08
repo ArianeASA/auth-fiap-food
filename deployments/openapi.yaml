@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: Auth Fiap-Food API
+  description: Authentication Api for Fiap-Food Api.
+  version: "1.0"
+paths:
+  /auth/users:
+    post:
+      summary: Create user to authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      x-amazon-apigateway-auth:
+        type: none
+      x-amazon-apigateway-integration:
+        uri: ${quote_receiver}
+        httpMethod: POST
+        type: AWS_PROXY
+      responses:
+        "201":
+          description: crated user successfully
+  /auth/users/token:
+    post:
+      summary: Get token!
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Auths"
+      x-amazon-apigateway-auth:
+        type: none
+      x-amazon-apigateway-integration:
+        uri: ${quote_receiver}
+        httpMethod: POST
+        type: AWS_PROXY
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        cpf:
+          type: string
+          example: code identification
+        name:
+          type: string
+          example: John
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: '12345'
+    Auths:
+      type: object
+      properties:
+        cpf:
+          type: string
+          example: code identification
+        password:
+          type: string
+          example: '12345'
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: f5r6er1fretRDGergRE$ERFsFsFWef$TTHJHJNOLVHKSRTh
+        expires_in:
+          type: number
+          example: 12
+        token_type:
+          type: string
+          example: Bearer

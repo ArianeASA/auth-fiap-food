@@ -1,0 +1,36 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Auth Fiap-Food API",
+    "description" : "Api de autenticacao para Fiap-Food Api.",
+    "version" : "1.0"
+  },
+  "paths" : {
+    "/{proxy+}" : {
+      "post" : {
+        "responses" : {
+          "default" : {
+            "description" : "Default response for POST /{proxy+}"
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "payloadFormatVersion" : "2.0",
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "${quote_receiver}",
+          "connectionType" : "INTERNET"
+        }
+      },
+      "parameters" : [ {
+        "name" : "proxy+",
+        "in" : "path",
+        "description" : "Generated path parameter for proxy+",
+        "required" : true,
+        "schema" : {
+          "type" : "string"
+        }
+      } ]
+    }
+  },
+  "x-amazon-apigateway-importexport-version" : "1.0"
+}
