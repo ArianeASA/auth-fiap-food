@@ -17,7 +17,7 @@ resource "aws_s3_bucket_acl" "lambda_bucket_acl" {
 }
 
 locals {
-  source_file = "../${path.module}/"
+  source_file = "../${path.module}/main"
   output_path_zip = "../${path.module}/main.zip"
 
 }
@@ -25,7 +25,7 @@ locals {
 data "archive_file" "lambda_zip" {
   type = "zip"
 
-  source_dir  = local.source_file
+  source_file  = local.source_file
   output_path = local.output_path_zip
 
 }
