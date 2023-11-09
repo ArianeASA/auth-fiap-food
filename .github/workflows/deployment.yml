@@ -76,7 +76,8 @@ jobs:
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
       run: |
         cd deployments
-        terraform plan -no-color -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+        terraform plan
+#        -no-color
 
 #    - name: Archive Terraform state
 #      uses: actions/upload-artifact@v2
@@ -88,7 +89,7 @@ jobs:
       if: github.ref == 'refs/heads/develop'
       run: |
         cd deployments
-        terraform apply -auto-approve -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+        terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
 #    - name: Download Terraform state
 #      uses: actions/download-artifact@v2
