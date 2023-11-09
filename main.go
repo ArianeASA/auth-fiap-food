@@ -79,7 +79,7 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
-			//Headers:    headers(),
+			Headers:    headers(),
 		}, nil
 	}
 
@@ -88,14 +88,14 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
-			//Headers:    headers(),
+			Headers:    headers(),
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 		Body:       "Created",
-		//Headers:    headers(),
+		Headers:    headers(),
 	}, nil
 }
 
@@ -118,7 +118,7 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
-		////Headers:    headers(),
+		Headers:    headers(),
 	}, nil
 }
 

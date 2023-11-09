@@ -6,9 +6,9 @@ name: Deploy
 on:
   workflow_dispatch:
   push:
-    branches: [ "develop" ]
+    branches: [ "feature/pipeline" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "feature/pipeline" ]
 #  release:
 #    types: [ published ]
 
@@ -38,23 +38,18 @@ jobs:
 #      run: zip ./main.zip main
 
 #                   Voltar        -----------------------------------------------------------------------------------------
-#    - name: Archive production artifacts
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: my-artifact
-#        path: ./main
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact
+        path: ./main
 
-#  deploy-aws:
-#    needs: go-build
-#    runs-on: ubuntu-20.04
-#
-#    steps:
-#    - uses: actions/checkout@v3
+  deploy-aws:
+    needs: go-build
+    runs-on: ubuntu-20.04
 
-#    - name: Download artifact
-#      uses: actions/download-artifact@v2
-#      with:
-#        name: my-artifact
+    steps:
+    - uses: actions/checkout@v3
 #                   Voltar        -----------------------------------------------------------------------------------------
 
     - name: Configure AWS Credentials
@@ -75,18 +70,23 @@ jobs:
       run: terraform validate
       working-directory: deployments
 
+#------------------------------ Test
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+       name: my-artifact
+#------------------------------ Test
 
     - name: Terraform Plan
-      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
+      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/feature/pipeline' }}
       run: terraform plan -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}'
       working-directory: deployments
 
 
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/develop'
+      if: github.ref == 'refs/heads/feature/pipeline'
       run: terraform apply -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
-
 
 
     - name: Cleanup if apply fails
