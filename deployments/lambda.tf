@@ -3,6 +3,7 @@ resource "aws_lambda_function" "auth_fiap_food" {
 
   s3_bucket = aws_s3_bucket.lambda_bucket.id
   s3_key    = aws_s3_object.lambda_main.key
+  s3_object_version = aws_s3_object.lambda_main.version_id
 
   runtime = "go1.x"
   handler = "main"
