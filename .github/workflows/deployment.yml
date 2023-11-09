@@ -96,6 +96,10 @@ jobs:
         name: terraform-state
         path: ./deployment/
 
+    - name: Cleanup if apply fails
+      if: ${{ failure() }}
+      run: terraform destroy -auto-approve
+
     - name: Request approval
       uses: actions/github-script@v5
       with:
