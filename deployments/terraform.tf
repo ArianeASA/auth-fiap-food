@@ -8,4 +8,10 @@ terraform {
   }
 
   required_version = "~> 1.2"
+
+  backend "s3" {
+    bucket = "terraforms-bucket"
+    key    = "states-lambda"
+    region = "us-east-2"
+  }
 }

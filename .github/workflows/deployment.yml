@@ -78,11 +78,11 @@ jobs:
         cd deployments
         terraform plan -no-color -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
-    - name: Archive Terraform state
-      uses: actions/upload-artifact@v2
-      with:
-        name: terraform-state
-        path: ./deployments/terraform.tfstate
+#    - name: Archive Terraform state
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: terraform-state
+#        path: ./deployments/terraform.tfstate
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/develop'
@@ -90,11 +90,11 @@ jobs:
         cd deployments
         terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
-    - name: Download Terraform state
-      uses: actions/download-artifact@v2
-      with:
-        name: terraform-state
-        path: ./deployment/
+#    - name: Download Terraform state
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: terraform-state
+#        path: ./deployments/
 
     - name: Cleanup if apply fails
       if: ${{ failure() }}
@@ -134,11 +134,11 @@ jobs:
         cd deployments
         terraform destroy -auto-approve
 
-    - name: Archive Terraform state
-      uses: actions/upload-artifact@v2
-      with:
-        name: terraform-state
-        path: ./deployments/terraform.tfstate
+#    - name: Archive Terraform state
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: terraform-state
+#        path: ./deployments/terraform.tfstate
 #    - name: AWS Lambda Deploy
 #      uses: appleboy/lambda-action@v0.1.9
 #      with:
