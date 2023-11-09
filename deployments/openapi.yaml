@@ -24,7 +24,7 @@ paths:
           description: crated user successfully
   /auth/users/token:
     post:
-      summary: Get token!
+      summary: Get token
       requestBody:
         required: true
         content:
