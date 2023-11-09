@@ -17,6 +17,7 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
+			Headers:    headers(),
 		}, nil
 	}
 	token, err := GetToken(credential)
@@ -24,6 +25,7 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
+			Headers:    headers(),
 		}, nil
 	}
 
@@ -35,6 +37,7 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 		Body:       string(obj),
+		Headers:    headers(),
 	}, nil
 
 }
