@@ -100,8 +100,8 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 }
 
 func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
-	log.Printf("EVENT : %v", req)
 	httpRequest := req.RequestContext.HTTP
+	log.Printf("EVENT : %v", req)
 
 	if strings.HasSuffix(httpRequest.Path, "/users") {
 		if httpRequest.Method == "POST" {
