@@ -53,10 +53,10 @@ jobs:
 #        zip_file: main.zip
 #        dry_run: true
 
-#    - name: Download artifact
-#      uses: actions/download-artifact@v2
-#      with:
-#        name: my-artifact
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: my-artifact
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
