@@ -36,5 +36,5 @@ resource "aws_s3_object" "lambda_main" {
   key    = "main.zip"
   source = local.output_path_zip
   acl   = "private"
-  etag = filebase64sha256(local.output_path_zip)
+  etag = base64sha256(file(local.output_path_zip))
 }
