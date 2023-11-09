@@ -41,7 +41,7 @@ jobs:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws_region: ${{ secrets.AWS_REGION }}
-        client_id: ${{ secrets.COG_CLIENT_ID }}
+        account_id: ${{ secrets.ACCOUNT_ID }}
         zip_file: main.zip
         dry_run: true
 
@@ -56,11 +56,11 @@ jobs:
 
     - name: Terraform Plan
       if: github.event_name == 'pull_request'
-      run: terraform plan -no-color -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.COG_CLIENT_ID }}'
+      run: terraform plan -no-color -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
-      run: terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.COG_CLIENT_ID }}'
+      run: terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
 #    - name: AWS Lambda Deploy
 #      uses: appleboy/lambda-action@v0.1.9
