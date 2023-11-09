@@ -30,9 +30,10 @@ jobs:
     - name: Build
       run: GOOS=linux go build -o main
 
+#    local precisa zipar
 #    - name: Zip
 #      run: zip ./main.zip main
-#
+
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -45,13 +46,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-#      with:
-#        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#        aws_region: ${{ secrets.AWS_REGION }}
-#        account_id: ${{ secrets.ACCOUNT_ID }}
-#        zip_file: main.zip
-#        dry_run: true
 
     - name: Download artifact
       uses: actions/download-artifact@v2
@@ -70,7 +64,6 @@ jobs:
 
     - name: Terraform Init
       run: terraform init -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
-#        -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
       working-directory: deployments
 
     - name: Terraform Validate
@@ -79,66 +72,72 @@ jobs:
 
 
     - name: Terraform Plan
-#      if: github.event_name == 'pull_request'
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
       run: terraform plan -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}'
       working-directory: deployments
 
-#    - name: Archive Terraform state
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: terraform-state
-#        path: ./deployments/terraform.tfstate
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/develop'
       run: terraform apply -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
 
-#    - name: Download Terraform state
-#      uses: actions/download-artifact@v2
-#      with:
-#        name: terraform-state
-#        path: ./deployments/
+
 
     - name: Cleanup if apply fails
       if: ${{ failure() }}
       run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
 
-    - name: Request approval
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const issue = await github.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: 'Terraform Destroy Approval',
-            body: 'Please approve to destroy the resources.'
-          });
-          return issue.data.number;
-      id: issue
 
-    - name: Wait for approval
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const { data: comments } = await github.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: ${{ steps.issue.outputs.result }}
-          });
-          const approval = comments.find(comment => comment.body.toLowerCase() === '/approve');
-          if (!approval) {
-            throw new Error('Approval not given');
-          }
-        timeout-minutes: 60
 
-    - name: Terraform Destroy
-      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
-      run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
-      working-directory: deployments
 
+
+
+
+
+
+
+#    - name: Request approval
+#      uses: actions/github-script@v5
+#      with:
+#        script: |
+#          const issue = await github.issues.create({
+#            owner: context.repo.owner,
+#            repo: context.repo.repo,
+#            title: 'Terraform Destroy Approval',
+#            body: 'Please approve to destroy the resources.'
+#          });
+#          return issue.data.number;
+#      id: issue
+#
+#    - name: Wait for approval
+#      uses: actions/github-script@v5
+#      with:
+#        script: |
+#          const { data: comments } = await github.issues.listComments({
+#            owner: context.repo.owner,
+#            repo: context.repo.repo,
+#            issue_number: ${{ steps.issue.outputs.result }}
+#          });
+#          const approval = comments.find(comment => comment.body.toLowerCase() === '/approve');
+#          if (!approval) {
+#            throw new Error('Approval not given');
+#          }
+#        timeout-minutes: 60
+
+#    - name: Terraform Destroy
+#      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
+#      run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+#      working-directory: deployments
+
+
+
+
+
+
+
+#                     Deploy direto para o lambda
 #    - name: Archive Terraform state
 #      uses: actions/upload-artifact@v2
 #      with:
