@@ -13,9 +13,9 @@ terraform {
     bucket = "terraforms-bucket"
     key    = "states-lambda"
     region = "us-east-2"
-    assume_role = {
-      role_arn = "arn:aws:iam::860076335049:role/Terraform"
-    }
+#    assume_role = {
+#      role_arn = "arn:aws:iam::860076335049:role/Terraform"
+#    }
   }
 }
 
