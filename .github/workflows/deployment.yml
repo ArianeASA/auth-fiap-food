@@ -13,7 +13,7 @@ on:
 
 jobs:
 
-  deploy-lambda:
+  go-build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -33,6 +33,7 @@ jobs:
       run: zip main.zip main
 
   deploy-aws:
+    needs: go-build
     runs-on: ubuntu-latest
 
     steps:
@@ -50,24 +51,24 @@ jobs:
 
     - name: Terraform Init
       run: |
-        cd deployment
+        cd deployments
         terraform init
 
     - name: Terraform Validate
       run: |
-        cd deployment
+        cd deployments
         terraform validate
 
     - name: Terraform Plan
       if: github.event_name == 'pull_request'
       run: |
-        cd deployment
+        cd deployments
         terraform plan -no-color -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
       run: |
-        cd deployment
+        cd deployments
         terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
 #    - name: AWS Lambda Deploy
