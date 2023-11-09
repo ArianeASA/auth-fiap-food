@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"log"
 	"strings"
 
 	"net/http"
@@ -99,7 +100,7 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 }
 
 func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
-	//log.Printf("EVENT : %v", req)
+	log.Printf("EVENT : %v", req)
 	httpRequest := req.RequestContext.HTTP
 
 	if strings.HasSuffix(httpRequest.Path, "/users") {
