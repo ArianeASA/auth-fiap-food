@@ -17,8 +17,8 @@ resource "aws_s3_bucket_acl" "lambda_bucket_acl" {
 }
 
 locals {
-  source_file = "../${path.module}/build/"
-  output_path_zip = "../${path.module}/build/main.zip"
+  source_file = "../${path.module}/"
+  output_path_zip = "../${path.module}/main.zip"
 
 }
 
