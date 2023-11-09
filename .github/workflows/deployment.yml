@@ -76,7 +76,7 @@ jobs:
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
       run: |
         cd deployments
-        terraform plan -no-color
+        terraform plan -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
 #    - name: Archive Terraform state
 #      uses: actions/upload-artifact@v2
