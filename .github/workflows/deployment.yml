@@ -69,7 +69,7 @@ jobs:
       uses: hashicorp/setup-terraform@v1
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 #        -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
       working-directory: deployments
 
@@ -81,7 +81,7 @@ jobs:
     - name: Terraform Plan
 #      if: github.event_name == 'pull_request'
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
-      run: terraform plan
+      run: terraform plan -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
 
 #    - name: Archive Terraform state
@@ -92,7 +92,7 @@ jobs:
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/develop'
-      run: terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      run: terraform apply -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
 
 #    - name: Download Terraform state
@@ -136,7 +136,7 @@ jobs:
 
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
-      run: terraform destroy -auto-approve -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      run: terraform destroy -auto-approve
       working-directory: deployments
 
 #    - name: Archive Terraform state
