@@ -53,10 +53,10 @@ jobs:
 #        zip_file: main.zip
 #        dry_run: true
 
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: my-artifact
+#    - name: Download artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: my-artifact
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
@@ -64,12 +64,12 @@ jobs:
     - name: Terraform Init
       run: |
         cd deployments
-        terraform init
+        terraform init -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
     - name: Terraform Validate
       run: |
         cd deployments
-        terraform validate
+        terraform validate -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 
     - name: Terraform Plan
 #      if: github.event_name == 'pull_request'
