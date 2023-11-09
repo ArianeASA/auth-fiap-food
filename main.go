@@ -114,7 +114,7 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 			return handleGetToken(req)
 		}
 	}
-
+	log.Println("Test novo código")
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
