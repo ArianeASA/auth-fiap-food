@@ -12,7 +12,10 @@ terraform {
   backend "s3" {
     bucket = "terraforms-bucket"
     key    = "states-lambda"
-    region = "us-east-2"
+    region = var.aws_region
+    assume_role = {
+      role_arn = "arn:aws:iam::${var.account_id}:role/Terraform"
+    }
   }
 }
 
@@ -21,6 +24,6 @@ data "terraform_remote_state" "network" {
   config = {
     bucket = "terraforms-bucket"
     key    = "states-lambda/terraform.tfstate"
-    region = "us-east-2"
+    region = var.aws_region
   }
 }

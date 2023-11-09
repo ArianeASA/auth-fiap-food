@@ -46,10 +46,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws_region: ${{ secrets.AWS_REGION }}
-        account_id: ${{ secrets.ACCOUNT_ID }}
+#        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#        aws_region: ${{ secrets.AWS_REGION }}
+#        account_id: ${{ secrets.ACCOUNT_ID }}
 #        zip_file: main.zip
 #        dry_run: true
 
@@ -58,25 +58,31 @@ jobs:
       with:
         name: my-artifact
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
 
     - name: Terraform Init
-      run: |
-        cd deployments
-        terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      run: terraform init
+#        -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      working-directory: deployments
 
     - name: Terraform Validate
-      run: |
-        cd deployments
-        terraform validate 
+      run: terraform validate
+      working-directory: deployments
+
 
     - name: Terraform Plan
 #      if: github.event_name == 'pull_request'
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
-      run: |
-        cd deployments
-        terraform plan -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      run: terraform plan
+      working-directory: deployments
 
 #    - name: Archive Terraform state
 #      uses: actions/upload-artifact@v2
@@ -86,9 +92,8 @@ jobs:
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/develop'
-      run: |
-        cd deployments
-        terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      run: terraform apply -auto-approve -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      working-directory: deployments
 
 #    - name: Download Terraform state
 #      uses: actions/download-artifact@v2
@@ -99,6 +104,7 @@ jobs:
     - name: Cleanup if apply fails
       if: ${{ failure() }}
       run: terraform destroy -auto-approve
+      working-directory: deployments
 
     - name: Request approval
       uses: actions/github-script@v5
@@ -130,9 +136,8 @@ jobs:
 
     - name: Terraform Destroy
       if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
-      run: |
-        cd deployments
-        terraform destroy -auto-approve -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      run: terraform destroy -auto-approve -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      working-directory: deployments
 
 #    - name: Archive Terraform state
 #      uses: actions/upload-artifact@v2
