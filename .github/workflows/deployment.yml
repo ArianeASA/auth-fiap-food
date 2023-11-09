@@ -30,8 +30,8 @@ jobs:
     - name: Build
       run: CGO_ENABLED=0 GOOS=linux go build -o main
 
-    - name: GLIBC
-      run: ldd -v main
+#    - name: GLIBC -erro na versao disso
+#      run: ldd -v main
 
 #    local precisa zipar
 #    - name: Zip
