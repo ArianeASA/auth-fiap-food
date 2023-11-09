@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"strings"
 
-	"log"
 	"net/http"
 )
 
@@ -18,6 +17,7 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
+			Headers:    headers(),
 		}, nil
 	}
 	token, err := GetToken(credential)
@@ -25,6 +25,7 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
+			Headers:    headers(),
 		}, nil
 	}
 
@@ -36,6 +37,7 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 		Body:       string(obj),
+		Headers:    headers(),
 	}, nil
 
 }
@@ -76,6 +78,7 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
+			Headers:    headers(),
 		}, nil
 	}
 
@@ -84,17 +87,19 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       err.Error(),
+			Headers:    headers(),
 		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 		Body:       "Created",
+		Headers:    headers(),
 	}, nil
 }
 
 func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
-	log.Printf("EVENT : %v", req)
+	//log.Printf("EVENT : %v", req)
 	httpRequest := req.RequestContext.HTTP
 
 	if strings.HasSuffix(httpRequest.Path, "/users") {
@@ -112,7 +117,14 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
+		Headers:    headers(),
 	}, nil
+}
+
+func headers() map[string]string {
+	var connType map[string]string
+	connType["Content-Type"] = "application/json"
+	return connType
 }
 
 func main() {
