@@ -3,10 +3,12 @@ package main
 import (
 	"auth-fiap-food/adapters"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"log"
 	"strings"
+	"time"
 
 	"net/http"
 )
@@ -114,7 +116,7 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 			return handleGetToken(req)
 		}
 	}
-	log.Println("Test novo código")
+	log.Println(fmt.Sprintf("Test novo código %s ", time.Now().String()))
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
