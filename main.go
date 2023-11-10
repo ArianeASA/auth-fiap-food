@@ -120,12 +120,12 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
-		Headers:    headers(),
+		//Headers:    headers(),
 	}, nil
 }
 
 func headers() map[string]string {
-	var connType map[string]string
+	connType := make(map[string]string)
 	connType["Content-Type"] = "application/json"
 	return connType
 }
