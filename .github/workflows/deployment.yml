@@ -14,7 +14,7 @@ on:
 
 jobs:
 
-  set-infra:
+  go-build:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
@@ -38,18 +38,18 @@ jobs:
 #      run: zip ./main.zip main
 
 #                   Voltar        -----------------------------------------------------------------------------------------
-#    - name: Archive production artifacts
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: my-artifact
-#        path: ./main
-#
-#  deploy-aws:
-#    needs: go-build
-#    runs-on: ubuntu-20.04
-#
-#    steps:
-#    - uses: actions/checkout@v3
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact
+        path: ./main
+
+  deploy-aws:
+    needs: go-build
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
 #                   Voltar        -----------------------------------------------------------------------------------------
 
     - name: Configure AWS Credentials
@@ -71,10 +71,10 @@ jobs:
       working-directory: deployments
 
 ##------------------------------ Test
-#    - name: Download artifact
-#      uses: actions/download-artifact@v2
-#      with:
-#       name: my-artifact
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+       name: my-artifact
 ##------------------------------ Test
 
     - name: Terraform Plan
