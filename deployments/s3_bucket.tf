@@ -36,4 +36,5 @@ resource "aws_s3_object" "lambda_main" {
   key    = "${formatdate("YYYYMMDDhhmmss", timestamp())}/main.zip"
   source = local.output_path_zip
   acl   = "private"
+  etag = data.archive_file.lambda_zip.output_base64sha256
 }
