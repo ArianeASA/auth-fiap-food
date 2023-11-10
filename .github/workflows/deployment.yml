@@ -6,9 +6,9 @@ name: Deploy
 on:
   workflow_dispatch:
   push:
-    branches: [ "feature/pipeline" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "feature/pipeline" ]
+    branches: [ "develop" ]
 #  release:
 #    types: [ published ]
 
@@ -37,7 +37,6 @@ jobs:
 #    - name: Zip
 #      run: zip ./main.zip main
 
-#                   Voltar        -----------------------------------------------------------------------------------------
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -50,7 +49,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-#                   Voltar        -----------------------------------------------------------------------------------------
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -70,24 +68,20 @@ jobs:
       run: terraform validate
       working-directory: deployments
 
-##------------------------------ Test
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
        name: my-artifact
-##------------------------------ Test
 
     - name: Terraform Plan
-      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/feature/pipeline' }}
+      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
       run: terraform plan -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}'
       working-directory: deployments
 
-
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/feature/pipeline'
+      if: github.ref == 'refs/heads/develop'
       run: terraform apply -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
-
 
     - name: Cleanup if apply fails
       if: ${{ failure() }}
