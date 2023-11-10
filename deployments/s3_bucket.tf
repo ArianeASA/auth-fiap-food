@@ -33,7 +33,7 @@ data "archive_file" "lambda_zip" {
 resource "aws_s3_object" "lambda_main" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
-  key    = "main.zip"
+  key    = "${formatdate("YYYYMMDD", timestamp())}/hash${formatdate("hhmmss", timestamp())}-main.zip"
   source = local.output_path_zip
   acl   = "private"
   etag = data.archive_file.lambda_zip.output_base64sha256
