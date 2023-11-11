@@ -1,45 +1,148 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: Deploy
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "develop" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "master" ]
+  release:
+    types: [ published ]
 
 jobs:
 
-  build:
-    runs-on: ubuntu-latest
+  go-build:
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
-      
+        go-version: '1.21'
+
     - name: Test
       run: go test -v ./...
     
     - name: Build
-      run: GOOS=linux go build -o main
+      run: CGO_ENABLED=0 GOOS=linux go build -o main
 
-    - name: Zip
-      run: zip main.zip main
+#    - name: GLIBC -erro na versao disso
+#      run: ldd -v main
 
-    - name: AWS Lambda Deploy
-      if: github.ref == 'refs/heads/master'
-      uses: appleboy/lambda-action@v0.1.9
+#    local precisa zipar
+#    - name: Zip
+#      run: zip ./main.zip main
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
       with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws_region: ${{ secrets.AWS_REGION }}
-        function_name: test-go
-        zip_file: main.zip
-        dry_run: true
+        name: my-artifact
+        path: ./main
+
+  deploy-aws:
+    needs: go-build
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Terraform Init
+      run: terraform init -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      working-directory: deployments
+
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: deployments
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+       name: my-artifact
+
+    - name: Terraform Plan
+      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/master' }}
+      run: terraform plan -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+      working-directory: deployments
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/master'
+      run: terraform apply -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      working-directory: deployments
+
+    - name: Cleanup if apply fails
+      if: ${{ failure() }}
+      run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+      working-directory: deployments
+
+
+
+
+
+
+#    - name: Request approval
+#      uses: actions/github-script@v5
+#      with:
+#        script: |
+#          const issue = await github.issues.create({
+#            owner: context.repo.owner,
+#            repo: context.repo.repo,
+#            title: 'Terraform Destroy Approval',
+#            body: 'Please approve to destroy the resources.'
+#          });
+#          return issue.data.number;
+#      id: issue
+#
+#    - name: Wait for approval
+#      uses: actions/github-script@v5
+#      with:
+#        script: |
+#          const { data: comments } = await github.issues.listComments({
+#            owner: context.repo.owner,
+#            repo: context.repo.repo,
+#            issue_number: ${{ steps.issue.outputs.result }}
+#          });
+#          const approval = comments.find(comment => comment.body.toLowerCase() === '/approve');
+#          if (!approval) {
+#            throw new Error('Approval not given');
+#          }
+#        timeout-minutes: 60
+
+#    - name: Terraform Destroy
+#      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/master' }}
+#      run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
+#      working-directory: deployments
+
+
+
+#   Deploy direto para o lambda
+#    - name: Archive Terraform state
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: terraform-state
+#        path: ./deployments/terraform.tfstate
+#    - name: AWS Lambda Deploy
+#      uses: appleboy/lambda-action@v0.1.9
+#      with:
+#        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#        aws_region: ${{ secrets.AWS_REGION }}
+#        function_name: test-go
+#        zip_file: main.zip
+#        dry_run: true
 
       
             
