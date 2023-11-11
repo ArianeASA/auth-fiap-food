@@ -27,6 +27,7 @@ jobs:
         path: ./main
 
   terraform_destroy:
+    needs: go-build
     runs-on: ubuntu-latest
     steps:
     - name: Configure AWS Credentials
