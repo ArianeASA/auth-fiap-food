@@ -7,10 +7,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"log"
-	"strings"
-	"time"
-
 	"net/http"
+	"strings"
 )
 
 type errorResponse struct {
@@ -19,6 +17,17 @@ type errorResponse struct {
 
 func newError(msg string) errorResponse {
 	return errorResponse{Cause: msg}
+}
+
+func getJson(obj interface{}) string {
+	objJson, _ := json.Marshal(obj)
+	return string(objJson)
+}
+
+func headers() map[string]string {
+	return map[string]string{
+		"Content-Type": "application/json",
+	}
 }
 
 func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
@@ -41,22 +50,12 @@ func handleGetToken(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyR
 		}, nil
 	}
 
-	//obj, err := json.Marshal(token)
-	//if err != nil {
-	//	return events.APIGatewayProxyResponse{}, err
-	//}
-
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusCreated,
 		Body:       getJson(token),
 		Headers:    headers(),
 	}, nil
 
-}
-
-func getJson(obj interface{}) string {
-	objJson, _ := json.Marshal(obj)
-	return string(objJson)
 }
 
 func GetToken(cred *adapters.Credentials) (adapters.AuthResult, error) {
@@ -117,7 +116,7 @@ func handleCreateUser(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProx
 
 func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
 	httpRequest := req.RequestContext.HTTP
-	log.Printf("EVENT : %v", req)
+	//log.Printf("EVENT : %v", req)
 
 	if strings.HasSuffix(httpRequest.Path, "/users") {
 		if httpRequest.Method == "POST" {
@@ -130,18 +129,13 @@ func router(req events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse,
 			return handleGetToken(req)
 		}
 	}
-	log.Println(fmt.Sprintf("Test novo código %s ", time.Now().String()))
+
+	log.Println(fmt.Sprintf("endpoint não encontrado %s", httpRequest.Path))
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusMethodNotAllowed,
 		Body:       http.StatusText(http.StatusMethodNotAllowed),
 		Headers:    headers(),
 	}, nil
-}
-
-func headers() map[string]string {
-	return map[string]string{
-		"Content-Type": "application/json",
-	}
 }
 
 func main() {

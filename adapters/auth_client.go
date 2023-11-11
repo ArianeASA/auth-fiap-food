@@ -7,18 +7,6 @@ import (
 	"os"
 )
 
-type User struct {
-	CPF      string `json:"cpf"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type Credentials struct {
-	Password string `json:"password"`
-	CPF      string `json:"cpf"`
-}
-
 type authExternalClient struct {
 	Client *cognitoidentityprovider.CognitoIdentityProvider
 }
@@ -89,10 +77,4 @@ func (auth *authExternalClient) NewToken(cred *Credentials) (AuthResult, error) 
 		ExpiresIn:   result.AuthenticationResult.ExpiresIn,
 		TokenType:   result.AuthenticationResult.TokenType,
 	}, nil
-}
-
-type AuthResult struct {
-	AccessToken *string `json:"access_token" type:"string" sensitive:"true"`
-	ExpiresIn   *int64  `json:"expires_in" type:"integer"`
-	TokenType   *string `json:"token_type" type:"string"`
 }
