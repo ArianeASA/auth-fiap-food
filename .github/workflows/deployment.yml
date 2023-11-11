@@ -8,9 +8,9 @@ on:
   push:
     branches: [ "develop" ]
   pull_request:
-    branches: [ "develop" ]
-#  release:
-#    types: [ published ]
+    branches: [ "develop", "master" ]
+  release:
+    types: [ published ]
 
 jobs:
 
@@ -74,12 +74,12 @@ jobs:
        name: my-artifact
 
     - name: Terraform Plan
-      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
+      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/master' }}
       run: terraform plan -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}'
       working-directory: deployments
 
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/develop'
+      if: github.ref == 'refs/heads/master'
       run: terraform apply -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
 
@@ -87,10 +87,6 @@ jobs:
       if: ${{ failure() }}
       run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
       working-directory: deployments
-
-
-
-
 
 
 
@@ -126,17 +122,13 @@ jobs:
 #        timeout-minutes: 60
 
 #    - name: Terraform Destroy
-#      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' }}
+#      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/master' }}
 #      run: terraform destroy -auto-approve -var 'aws_region=${{ secrets.AWS_REGION }}' -var 'access_key=${{ secrets.AWS_ACCESS_KEY_ID }}' -var 'secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -var 'account_id=${{ secrets.ACCOUNT_ID }}'
 #      working-directory: deployments
 
 
 
-
-
-
-
-#                     Deploy direto para o lambda
+#   Deploy direto para o lambda
 #    - name: Archive Terraform state
 #      uses: actions/upload-artifact@v2
 #      with:
